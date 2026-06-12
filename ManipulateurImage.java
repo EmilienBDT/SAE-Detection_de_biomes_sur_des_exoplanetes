@@ -60,4 +60,69 @@ public class ManipulateurImage {
         }
         return dest;
     }
+
+    public static BufferedImage copierImage(BufferedImage source) {
+        int width = source.getWidth();
+        int height = source.getHeight();
+        BufferedImage copie = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                copie.setRGB(x, y, source.getRGB(x, y));
+            }
+        }
+        return copie;
+    }
+
+    // filtre gaussiens
+    public static BufferedImage FiltreConvolution(BufferedImage source, int[][] matrice, int somme) {
+
+        BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+
+        
+        int tailleMatrice = matrice.length;
+        int offset = tailleMatrice / 2;
+
+        // parcours de l'image
+        for (int x = offset; x < source.getWidth() - offset; x++) {
+            for (int y = offset; y < source.getHeight() - offset; y++) {
+                
+                int r = 0, g = 0, b = 0;
+                
+               // parcours de la matrice
+                for (int i = -offset; i <= offset; i++) {
+                    for (int j = -offset; j <= offset; j++) {
+                        
+                        int rgb = source.getRGB(x + i, y + j);
+                        
+                        int pixelR = (rgb >> 16) & 0xFF;
+                        int pixelG = (rgb >> 8) & 0xFF;
+                        int pixelB = rgb & 0xFF;
+                        
+                        // Récupération du coefficient
+                        int coef = matrice[i + offset][j + offset];
+                        
+                        r += pixelR * coef;
+                        g += pixelG * coef;
+                        b += pixelB * coef;
+                    }
+                }
+                
+                
+                r = r / somme;
+                g = g / somme;
+                b = b / somme;
+                
+                r = Math.min(Math.max(r, 0), 255);
+                g = Math.min(Math.max(g, 0), 255);
+                b = Math.min(Math.max(b, 0), 255);
+                
+                int newRgb = (255 << 24) | (r << 16) | (g << 8) | b;
+                
+                dest.setRGB(x, y, newRgb);
+            }
+        }
+
+        return dest;
+    }
 }
